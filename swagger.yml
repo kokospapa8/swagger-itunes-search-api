@@ -103,7 +103,7 @@ paths:
           tvShow: tvEpisode, tvSeason
           software: software, iPadSoftware, macSoftware
           ebook: ebook
-          all	: movie, album, allArtist, podcast, musicVideo, mix, audiobook, tvSeason, allTrack
+          all  : movie, album, allArtist, podcast, musicVideo, mix, audiobook, tvSeason, allTrack
           ```      
           Please note that “musicTrack” can include both songs and music videos in the results
 
@@ -164,7 +164,7 @@ paths:
 
           software: softwaresoftwareDeveloper
 
-          all	: actorTerm, languageTerm, allArtistTerm, tvEpisodeTerm, shortFilmTerm, directorTerm, releaseYearTerm, titleTerm, featureFilmTerm, ratingIndex, keywordsTerm, descriptionTerm, authorTerm, genreIndex, mixTerm, allTrackTerm, artistTerm, composerTerm, tvSeasonTerm, producerTerm, ratingTerm, songTerm, movieArtistTerm, showTerm, movieTerm, albumTerm
+          all  : actorTerm, languageTerm, allArtistTerm, tvEpisodeTerm, shortFilmTerm, directorTerm, releaseYearTerm, titleTerm, featureFilmTerm, ratingIndex, keywordsTerm, descriptionTerm, authorTerm, genreIndex, mixTerm, allTrackTerm, artistTerm, composerTerm, tvSeasonTerm, producerTerm, ratingTerm, songTerm, movieArtistTerm, showTerm, movieTerm, albumTerm
           ```      
         required: false
         type: "string" 
@@ -216,7 +216,7 @@ paths:
         description: |
           The language, English or Japanese, you want to use when returning search results. Specify the language using the five-letter codename. 
           
-          For example: en_us.The default is en_us (English).	          
+          For example: en_us.The default is en_us (English).            
         required: false
         type: "string"
         enum:
@@ -233,10 +233,10 @@ paths:
           - 1
           - 2
         default: 2
-      - name: "explicit	"
+      - name: "explicit  "
         in: "query"
         description: |
-          A flag indicating whether or not you want to include explicit content in your search results.	
+          A flag indicating whether or not you want to include explicit content in your search results.  
         required: false
         type: "string"
         enum:
@@ -259,12 +259,136 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/Result"
+  /lookup:
+    get:
+      tags:
+      - "Lookup"
+      summary: "Lookup itunes DB with id"
+      description: |
+        - create a lookup request to search for content in the stores based on 
+          iTunes IDs, UPCs/ EANs, and All Music Guide (AMG) IDs. 
+          
+        - ID-based lookups are faster and contain fewer false-positive results.
+      operationId: "lookup"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: |
+          iTunes id, artistId, collectionId, trackID
+        required: false
+        type: "number"
+      - name: "amgArtisId"
+        in: "query"
+        description: |
+          Id based on[All Music Guide](https://www.allmusic.com/) 
+          Multiple lookup is available with CVS 
+          
+          e.g amgArtistId=5123,2134,123
+        required: false
+        type: "number"
+      - name: "amgAlbumId"
+        in: "query"
+        description: |
+          Id based on[All Music Guide](https://www.allmusic.com/) 
+          Multiple lookup is available with CVS 
+          
+          e.g amgAlbumId=5123,2134,123
+        required: false
+        type: "number"
+      - name: "amgVideoId"
+        in: "query"
+        description: |
+          Id based on[All Music Guide](https://www.allmusic.com/) 
+          Multiple lookup is available with CVS 
+          
+          e.g amgVideoId=5123,2134,123
+        required: false
+        type: "number"        
+      - name: "upc"
+        in: "query"
+        description: |
+          Lookup album or video
+        required: false
+        type: "number"
+      - name: "isbn"
+        in: "query"
+        description: |
+          Lookup by isbn
+        required: false
+        type: "number"
+      - name: "entity"
+        in: "query"
+        description: |
+          The type of results you want returned, relative to the specified media type. 
+          
+          For example: movieArtist for a movie media type search. 
+          
+          The default is the track entity associated with the specified media type.
+          
+          The following entities are available for each media type:
+          
+          ```
+          movie: movie, movieArtist
+          podcast: podcastAuthor, podcast
+          music: musicArtist, musicTrack, album, musicVideo, mix, song
+          musicVideo: musicArtist, musicVideo
+          audiobook: audiobookAuthor, audiobook
+          shortFilm: shortFilmArtist, shortFilm
+          tvShow: tvEpisode, tvSeason
+          software: software, iPadSoftware, macSoftware
+          ebook: ebook
+          all  : movie, album, allArtist, podcast, musicVideo, mix, audiobook, tvSeason, allTrack
+          ```      
+          Please note that “musicTrack” can include both songs and music videos in the results
 
+        required: false
+        type: "string" 
+        enum:
+          - movie
+          - movieArtist
+          - podcastAuthor
+          - podcast
+          - musicArtist
+          - musicVideo
+          - audiobookAuthor
+          - audiobook
+          - shortFilmArtist
+          - shortFilm
+          - tvEpisode
+          - tvSeason
+          - software
+          - iPadSoftware
+          - macSoftware
+          - ebook
+          - album
+          - allArtist
+          - mix
+          - allTrack
+          - musicTrack
+          - song
+        default: allTrack
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              resultCount: 
+                type: integer
+                example: 50
+                description: number of result passed my "limit" value
+              results:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Result"        
+        
 definitions:
   Result:
     type: "object"
     properties:
-      wrapperType	:
+      wrapperType  :
         type: "string"
         description: "The name of the object returned by the search request."
         example: "track"
@@ -388,14 +512,14 @@ definitions:
         description: |
           A URL referencing the 30-second preview file for the content associated with the returned media type.
           
-          Only returned when media type is track	
+          Only returned when media type is track  
         example: "http:// a392.itunes.apple.com/jp/r10/ Music/y2005/m06/d03/h05/s05.zdzqlufu.p.m4p"   
       trackTimeMillis:
         description: "The returned track’s time in milliseconds."
         type: "integer"
         example: 210743
       collectionPrice:
-        type: number	
+        type: number  
         format: float
         example: 10.99
       trackPrice:

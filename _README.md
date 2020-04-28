@@ -1,4 +1,4 @@
-![screenshot](screenshot.png)
+![screenshot](screenshot.jpg)
 
 # Swagger - Itunes Search API
 

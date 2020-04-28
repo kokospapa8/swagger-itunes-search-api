@@ -1,0 +1,425 @@
+swagger: "2.0"
+info:
+  description: |
+    # Overview
+    The Search API allows you to place search fields in your website to search for content within the iTunes Store and Apple Books Store. You can search for a variety of content; including books, movies, podcasts, music, music videos, audiobooks, and TV shows. You can also call an ID-based lookup request to create mappings between your content library and the digital catalog. Developers may use promotional content in the API, including previews of songs, music videos, album art and App icons only to promote store content and not for entertainment purposes. Use of sound samples and other assets from the API must be proximate to a store badge. Terms and conditions apply."
+    
+    # Legal
+    Developers may use certain promotional content as may be provided by Apple, including previews of songs and music videos, and album art, for the purposes of promoting the subject of the Promo Content; provided such Promo Content: (i) is placed only on pages that promote the content on which the Promo Content is based; (ii) is proximate to a “Download on iTunes” or “Download on App Store” badge (as approved by Apple) that acts as a link directly to pages within iTunes where consumers can purchase the promoted content; (iii) includes attribution indicating the Promo Content was “provided courtesy of iTunes” if such Promo Content includes song or music video previews; (iv) is streamed only, and not downloaded, saved, cached, or synchronized with video, if such Promo Content includes song or music video previews; (v) is not used for independent entertainment value apart from its promotional purpose; and (vi) is not used to promote any other goods or services. Developer acknowledges that Apple provides the Promo Content “as is,” and disclaims any and all representations or warranties, including, but not limited to, non-infringement. Developer shall forward any claims received in connection with the Promo Content to Apple immediately upon receipt, and will remove any Promo Content immediately upon request from Apple.
+
+
+    
+  
+  version: "1.0.0"
+  title: "iTunes Search API"
+  termsOfService: "https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/"
+  contact:
+    email: "kokospapa8@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "itunes.apple.com"
+tags:
+- name: "Search"
+  description: "Term based search"
+- name: "Lookup"
+  description: "ID-based lookups"
+schemes:
+- "https"
+
+paths:
+  /search:
+    get:
+      tags:
+      - "Search"
+      summary: "Search itunes with term"
+      description: |
+        - It is critical to encode your URLs correctly in order to be commissioned for partner links. Notes on partners encoding raw links can be found in the Advanced Partner Linking document.
+        
+        - To improve response times, minimize the number of search results the Search API returns by specifying an appropriate value for the limit parameter key.
+        
+        - The Search API is limited to approximately 20 calls per minute (subject to change). If you require heavier usage, we suggest you consider using our Enterprise Partner Feed (EPF).  If you wish to access content on our EPF, please review our documentation page for more information.
+        
+        - Large websites should set up caching logic for the search and lookup requests sent to the Search API. For an illustration, see Caching Architecture later in this document.
+        
+      operationId: "searchByTerm"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "term"
+        in: "query"
+        description: |
+          The URL-encoded text string you want to search for. 
+          For example: jack+johnson.
+          
+          URL encoding replaces spaces with the plus (+) character and all characters except the following are encoded: letters, numbers, periods (.), dashes (-), underscores (_), and asterisks (*)
+        required: true
+        type: "string"
+      - name: "country"
+        in: "query"
+        description: |
+          The two-letter country code for the store you want to search. The search uses the default store front for the specified country.
+        
+          See [ISO 3166](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+        required: true
+        type: "string"
+        default: "US"
+      - name: "media"
+        in: "query"
+        description: |
+          The media type you want to search for. 
+        required: false
+        type: "string" 
+        enum:
+          - movie
+          - podcast
+          - music
+          - musicVideo
+          - audiobook
+          - shortFilm
+          - tvShow
+          - software
+          - ebook
+          - all
+        default: "all"
+      - name: "entity"
+        in: "query"
+        description: |
+          The type of results you want returned, relative to the specified media type. 
+          
+          For example: movieArtist for a movie media type search. 
+          
+          The default is the track entity associated with the specified media type.
+          
+          The following entities are available for each media type:
+          
+          ```
+          movie: movie, movieArtist
+          podcast: podcastAuthor, podcast
+          music: musicArtist, musicTrack, album, musicVideo, mix, song
+          musicVideo: musicArtist, musicVideo
+          audiobook: audiobookAuthor, audiobook
+          shortFilm: shortFilmArtist, shortFilm
+          tvShow: tvEpisode, tvSeason
+          software: software, iPadSoftware, macSoftware
+          ebook: ebook
+          all	: movie, album, allArtist, podcast, musicVideo, mix, audiobook, tvSeason, allTrack
+          ```      
+          Please note that “musicTrack” can include both songs and music videos in the results
+
+        required: false
+        type: "string" 
+        enum:
+          - movie
+          - movieArtist
+          - podcastAuthor
+          - podcast
+          - musicArtist
+          - musicVideo
+          - audiobookAuthor
+          - audiobook
+          - shortFilmArtist
+          - shortFilm
+          - tvEpisode
+          - tvSeason
+          - software
+          - iPadSoftware
+          - macSoftware
+          - ebook
+          - album
+          - allArtist
+          - mix
+          - allTrack
+          - musicTrack
+          - song
+        default: allTrack
+      - name: "attribute"
+        in: "query"
+        description: |
+          The attribute you want to search for in the stores, relative to the specified media type.
+          
+          For example, if you want to search for an artist by name specify entity=allArtist&attribute=allArtistTerm. 
+          
+          In this example, if you search for term=maroon, iTunes returns “Maroon 5” in the search results, instead of all artists who have ever recorded a song with the word “maroon” in the title.
+          
+          default: select all 
+          
+          
+          The following attributes are available for each media type:
+          
+          ```
+          movie: actorTerm, genreIndex, artistTerm, shortFilmTerm, producerTerm, ratingTerm, directorTerm, releaseYearTerm, featureFilmTerm, movieArtistTerm, movieTerm, ratingIndex, descriptionTerm
+
+          podcast: titleTerm, languageTerm, authorTerm, genreIndex, artistTerm, ratingIndex, keywordsTerm, descriptionTerm
+
+          music: mixTerm, genreIndex, artistTerm, composerTerm, albumTerm, ratingIndex, songTerm
+          
+          musicVideo: genreIndex, artistTerm, albumTerm, ratingIndex, songTerm
+
+          audiobook: audiobookAuthortitleTerm, authorTerm, genreIndex, ratingIndex
+
+          shortFilm: genreIndex, artistTerm, shortFilmTerm, ratingIndex, descriptionTerm
+
+          tvShow: tvEpisodegenreIndex, tvEpisodeTerm, showTerm, tvSeasonTerm, ratingIndex, descriptionTerm
+
+          software: softwaresoftwareDeveloper
+
+          all	: actorTerm, languageTerm, allArtistTerm, tvEpisodeTerm, shortFilmTerm, directorTerm, releaseYearTerm, titleTerm, featureFilmTerm, ratingIndex, keywordsTerm, descriptionTerm, authorTerm, genreIndex, mixTerm, allTrackTerm, artistTerm, composerTerm, tvSeasonTerm, producerTerm, ratingTerm, songTerm, movieArtistTerm, showTerm, movieTerm, albumTerm
+          ```      
+        required: false
+        type: "string" 
+        enum:
+          - actorTerm
+          - languageTerm
+          - allArtistTerm
+          - tvEpisodeTerm
+          - shortFilmTerm
+          - directorTerm
+          - releaseYearTerm
+          - titleTerm
+          - featureFilmTerm
+          - ratingIndex
+          - keywordsTerm
+          - descriptionTerm
+          - authorTerm
+          - genreIndex
+          - mixTerm
+          - allTrackTerm
+          - artistTerm
+          - composerTerm
+          - tvSeasonTerm
+          - producerTerm
+          - ratingTerm
+          - songTerm
+          - movieArtistTerm
+          - showTerm
+          - movieTerm
+          - albumTerm
+
+      - name: "callback"
+        in: "query"
+        description: |
+          TheThe name of the Javascript callback function you want to use when returning search results to your website.
+        required: false
+        type: "string"
+      - name: "limit"
+        in: "query"
+        description: |
+          The number of search results you want the iTunes Store to return.
+          
+          value allowed for [1, 200]
+        required: false
+        type: "integer"
+        default: 50       
+      - name: "lang"
+        in: "query"
+        description: |
+          The language, English or Japanese, you want to use when returning search results. Specify the language using the five-letter codename. 
+          
+          For example: en_us.The default is en_us (English).	          
+        required: false
+        type: "string"
+        enum:
+          - en_us
+          - ja_jp
+        default: "en_us"
+      - name: "version"
+        in: "query"
+        description: |
+          The search result key version you want to receive back from your search.
+        required: false
+        type: "integer"
+        enum:
+          - 1
+          - 2
+        default: 2
+      - name: "explicit	"
+        in: "query"
+        description: |
+          A flag indicating whether or not you want to include explicit content in your search results.	
+        required: false
+        type: "string"
+        enum:
+          - Yes
+          - No
+        default: Yes
+
+          
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: "object"
+            properties:
+              resultCount: 
+                type: integer
+                example: 50
+                description: number of result passed my "limit" value
+              results:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Result"
+
+definitions:
+  Result:
+    type: "object"
+    properties:
+      wrapperType	:
+        type: "string"
+        description: "The name of the object returned by the search request."
+        example: "track"
+        enum:
+        - "track"
+        - "collection"
+        - "artistFor"
+      trackExplicitness:
+        type: "string"
+        description: |
+          The Recording Industry Association of America (RIAA) parental advisory for the content returned by the search request.
+          
+          For more information, see [parental advisory](http://itunes.apple.com/WebObjects/MZStore.woa/wa/parentalAdvisory)
+
+        example: "track"
+        enum:
+        - "notExplicit"
+        - "cleaned"
+        - "explicit"
+      collectionExplicitness:
+        type: "string"
+        description: |
+          The Recording Industry Association of America (RIAA) parental advisory for the content returned by the search request.
+          
+          For more information, see [parental advisory](http://itunes.apple.com/WebObjects/MZStore.woa/wa/parentalAdvisory)
+
+        example: "track"
+        enum:
+        - "notExplicit"
+        - "cleaned"
+        - "explicit"            
+      artistId:
+        type: integer
+        example: 909253
+        description: exist only if available
+      collectionId:
+        type: integer
+        example: 120954021
+        description: exist only if available
+      trackId:
+        type: integer
+        example: 120954025
+        description: exist only if available
+      kind:
+        type: "string"
+        description: "The kind of content returned by the search request."
+        example: "book"
+        enum:
+        - book
+        - album
+        - coached-audio
+        - feature-movie
+        - interactive-booklet
+        - music-video
+        - pdf
+        - podcast
+        - podcast-episode
+        - software-package
+        - song
+        - tv-episode
+        - artistFor
+      trackName:
+        type: "string"
+        description: "The name of the track, song, video, TV episode, and so on returned by the search request."
+        example: "Banana Pancakes"
+      artistName:
+        type: "string"
+        description: "The name of the artist returned by the search request."
+        example: "Jack Johnson"
+      collectionName:
+        type: "string"
+        description: "The name of the album, TV season, audiobook, and so on returned by the search request."
+        example: "In Between Dreams"
+      trackCensoredName:
+        type: "string"
+        description: |
+          The name of the album, TV season, audiobook, and so on returned by the search request, with objectionable words *’d out.
+          
+          Note: Artist names are never censored.
+        example: "S**t Happens"
+      collectionCensoredName:
+        type: "string"
+        description: |
+          The name of the album, TV season, audiobook, and so on returned by the search request, with objectionable words *’d out.
+          
+          Note: Artist names are never censored.
+        example: "S**t Happens"
+      artworkUrl100:
+        type: "string"
+        format: URL
+        description: |
+          A URL for the artwork associated with the returned media type, sized to 100×100 pixels
+        example: "http:// a1.itunes.apple.com/jp/r10/Music/ y2005/m06/d03/h05/s05.oazjtxkw.100×100-75.jpg"
+      artworkUrl60:
+        type: "string"
+        format: URL
+        description: |
+          A URL for the artwork associated with the returned media type, sized to 60×60 pixels
+        example: "http:// a1.itunes.apple.com/jp/r10/Music/ y2005/m06/d03/h05/s05.oazjtxkw.60×60-75.jpg"
+      collectionViewURL:
+        type: "string"
+        format: URL
+        description: |
+          A URL for the content associated with the returned media type.
+        example: "http:// itunes.apple.com/WebObjects/ MZStore.woa/wa/viewAlbum?i=68615807&id=68615813&s=143462"
+      artistViewUrl:
+        type: "string"
+        format: URL
+        description: |
+          A URL for the content associated with the returned media type.
+        example: "http:// itunes.apple.com/WebObjects/ MZStore.woa/wa/viewAlbum?i=68615807&id=68615813&s=143462"        
+      trackViewUrl:
+        type: "string"
+        format: URL
+        description: |
+          A URL for the content associated with the returned media type.
+        example: "http:// itunes.apple.com/WebObjects/ MZStore.woa/wa/viewAlbum?i=68615807&id=68615813&s=143462"            
+      previewUrl:
+        type: "string"
+        format: URL
+        description: |
+          A URL referencing the 30-second preview file for the content associated with the returned media type.
+          
+          Only returned when media type is track	
+        example: "http:// a392.itunes.apple.com/jp/r10/ Music/y2005/m06/d03/h05/s05.zdzqlufu.p.m4p"   
+      trackTimeMillis:
+        description: "The returned track’s time in milliseconds."
+        type: "integer"
+        example: 210743
+      collectionPrice:
+        type: number	
+        format: float
+        example: 10.99
+      trackPrice:
+        type: number
+        format: float
+        example: 0.99
+      discCount:
+        type: integer
+        example: 1
+      discNumber:
+        type: integer
+        example: 1
+      trackCount:
+        type: integer
+        example: 14
+      trackNumber:
+        type: integer
+        example: 1
+      country:
+        type: string
+        example: "USA"
+      currency:
+        type: string
+        example: "USD"
+      primaryGenreName:
+        type: string
+        example: "Rock"
